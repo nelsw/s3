@@ -1,4 +1,4 @@
-package main
+package s3
 
 import (
 	"bytes"
@@ -76,12 +76,12 @@ func (c *client) Get(k string) ([]byte, error) {
 		Bucket: c.Bucket,
 		Key:    &k,
 	})
-	if err != nil {
-		return nil, err
-	}
-	defer out.Body.Close()
+
 	var body []byte
-	body, err = io.ReadAll(out.Body)
+	if err == nil {
+		defer out.Body.Close()
+		body, err = io.ReadAll(out.Body)
+	}
 
 	log.Trace().
 		Err(err).
@@ -174,7 +174,7 @@ func (c *client) Find(k string, a any) error {
 
 	b, err := c.Get(k)
 	if err == nil {
-		err = json.Unmarshal(b, &a)
+		err = json.Unmarshal(b, a)
 	}
 
 	log.Trace().
